@@ -1,0 +1,24 @@
+{
+    "devices": [
+        {
+            "code": "type1",
+            "id": "device1",
+            "status": 1
+        },
+        {
+            "code": "type1",
+            "id": "device2",
+            "status": 1
+        },
+        {
+            "code": "type1",
+            "id": "device3",
+            "status": 1
+        },
+        {
+            "code": "type2",
+            "id": "device4",
+            "status": 1
+        }
+    ]
+}
