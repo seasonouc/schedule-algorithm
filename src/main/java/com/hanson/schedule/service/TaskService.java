@@ -72,6 +72,7 @@ public class TaskService {
                     task.setComponentPriority(component.getPriority());
                     task.setOriginalReady(component.isOriginalReady());
                     task.setStatus(procedure.getStatus());
+                    task.setPreReady(procedure.isPreReady());
                     if (procedure.getDeviceId() != null) {
                         task.setDeviceId(procedure.getDeviceId());
                         DeviceWorkLoad workLoad = new DeviceWorkLoad();
@@ -117,6 +118,8 @@ public class TaskService {
             deviceQueue.add(workLoad);
         }
 
+        Map<String, Procedure> procedureMap = new HashMap<>();
+
         // 分配任务
         while (taskQueue.size() > 0) {
             Task task = taskQueue.poll();
@@ -142,20 +145,27 @@ public class TaskService {
                     plan.setStartTime(LocalDateTime.now());
                 }
 
+                workLoad.setCurrentDateTime(plan.getStartTime());
                 List<Procedure> procedures = new ArrayList<>();
                 plan.setProcedures(procedures);
                 producePlanMap.put(workLoad.getDeviceId(), plan);
             }
             LocalDateTime predictStartTime = task.getTaskStartTime();
             if (predictStartTime == null) {
-                predictStartTime = this.deviceService.getCompleteTime(plan.getStartTime(), workLoad.getTotalTime());
+                predictStartTime = workLoad.getCurrentDateTime();
+            }
+
+            Procedure preProcedure = procedureMap.get(task.getPreProcedureId());
+            if (preProcedure != null && preProcedure.getPredictCompleteTime().isBefore(predictStartTime)) {
+                predictStartTime = preProcedure.getPredictCompleteTime();
             }
 
             workLoad.setTotalTime(workLoad.getTotalTime() + task.getCompleteTime());
             deviceQueue.add(workLoad);
 
             LocalDateTime predictCompleteTime = this.deviceService.getCompleteTime(predictStartTime,
-                    workLoad.getTotalTime());
+                    task.getCompleteTime());
+            workLoad.setCurrenDateTime(predictCompleteTime);
 
             Procedure procedure = new Procedure();
             procedure.setDeviceId(workLoad.getDeviceId());
@@ -166,6 +176,8 @@ public class TaskService {
             procedure.setPredictCompleteTime(predictCompleteTime);
             procedure.setPredictStartTime(predictStartTime);
             procedure.setStartTime(task.getTaskStartTime());
+
+            procedureMap.put(procedure.getId(), procedure);
             plan.getProcedures().add(procedure);
         }
 

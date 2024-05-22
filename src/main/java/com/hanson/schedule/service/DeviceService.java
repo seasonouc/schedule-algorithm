@@ -102,7 +102,7 @@ public class DeviceService {
                 return LocalDateTime.of(targetDate, engLocalTime);
             }
         }
-        return null;
+        return fromTime.plus(sec, ChronoUnit.SECONDS);
 
     }
 }

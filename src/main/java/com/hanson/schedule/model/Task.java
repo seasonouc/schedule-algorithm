@@ -42,6 +42,9 @@ public class Task implements Comparable<Task> {
     // 生产材料是否已入库
     private boolean isOriginalReady;
 
+    // 前序是否ok
+    private boolean isPreReady;
+
     // 任务状态 0: 未开始, 1: 进行中, 2: 已完成
     private Integer status;
 
@@ -61,17 +64,18 @@ public class Task implements Comparable<Task> {
         if (status != o.status) {
             return o.status - status;
         }
-        if (!isOriginalReady()) {
-            return 1;
-        }
-        if (o.isOriginalReady()) {
-            return -1;
+        if (isOriginalReady != o.isOriginalReady) {
+            return o.isOriginalReady ? 1 : -1;
+
         }
         if (leftProcedure <= 4) {
             return -1;
         }
         if (o.getLeftProcedure() <= 4) {
             return 1;
+        }
+        if (isPreReady != o.isPreReady) {
+            return o.isPreReady ? 1 : -1;
         }
 
         if (orderPriority != o.orderPriority) {
