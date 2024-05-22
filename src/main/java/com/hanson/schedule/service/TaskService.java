@@ -165,7 +165,7 @@ public class TaskService {
 
             LocalDateTime predictCompleteTime = this.deviceService.getCompleteTime(predictStartTime,
                     task.getCompleteTime());
-            workLoad.setCurrenDateTime(predictCompleteTime);
+            workLoad.setCurrentDateTime(predictCompleteTime);
 
             Procedure procedure = new Procedure();
             procedure.setDeviceId(workLoad.getDeviceId());
