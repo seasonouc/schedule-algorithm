@@ -61,6 +61,13 @@ public class Task implements Comparable<Task> {
 
     @Override
     public int compareTo(Task o) {
+        if (preProcedureId != null && preProcedureId.contains(o.getProcedureId())) {
+            return 1;
+        }
+        if (o.getPreProcedureId() != null && o.getPreProcedureId().contains(procedureId)) {
+            return -1;
+
+        }
         if (status != o.status) {
             return o.status - status;
         }

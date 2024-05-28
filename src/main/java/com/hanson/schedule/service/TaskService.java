@@ -18,7 +18,10 @@ import com.hanson.schedule.model.Procedure;
 import com.hanson.schedule.model.ProducePlan;
 import com.hanson.schedule.model.Task;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class TaskService {
 
     @Autowired
@@ -128,6 +131,10 @@ public class TaskService {
             }
             String deviceCode = task.getDeviceCode();
             PriorityQueue<DeviceWorkLoad> deviceQueue = deviceMap.get(deviceCode);
+            if (deviceQueue == null) {
+                log.error("deviceQueue is null, deviceCode: {}", deviceCode);
+                continue;
+            }
             DeviceWorkLoad workLoad = deviceQueue.poll();
             workLoad.setTaskCount(workLoad.getTaskCount() + 1);
 
@@ -158,6 +165,8 @@ public class TaskService {
             Procedure preProcedure = procedureMap.get(task.getPreProcedureId());
             if (preProcedure != null && preProcedure.getPredictCompleteTime().isBefore(predictStartTime)) {
                 predictStartTime = preProcedure.getPredictCompleteTime();
+            } else if (deviceCode.equalsIgnoreCase("outsource")) {
+                predictStartTime = LocalDateTime.now();
             }
 
             workLoad.setTotalTime(workLoad.getTotalTime() + task.getCompleteTime());

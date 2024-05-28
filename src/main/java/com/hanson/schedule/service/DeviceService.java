@@ -27,14 +27,14 @@ public class DeviceService {
                 this.devices.add(device);
             }
         }
-        for (int i = 0; i < 100; i++) {
-            Device device = new Device();
-            device.setCode("outsource");
-            device.setId("outsource" + i);
-            device.setStatus(1);
-            device.setType(1);
-            this.devices.add(device);
-        }
+        // for (int i = 0; i < 100; i++) {
+        Device device = new Device();
+        device.setCode("outsource");
+        device.setId("outsource");
+        device.setStatus(1);
+        device.setType(1);
+        this.devices.add(device);
+        // }
 
         return this.devices.toArray(new Device[0]);
     }
