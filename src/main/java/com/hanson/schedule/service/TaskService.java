@@ -76,7 +76,7 @@ public class TaskService {
                     task.setOriginalReady(component.isOriginalReady());
                     task.setStatus(procedure.getStatus());
                     task.setPreReady(procedure.isPreReady());
-                    if (procedure.getDeviceId() != null) {
+                    if (procedure.getDeviceId() != null && !"".equals(procedure.getDeviceId())) {
                         task.setDeviceId(procedure.getDeviceId());
                         DeviceWorkLoad workLoad = new DeviceWorkLoad();
                         workLoad.setDeviceId(procedure.getDeviceId());
@@ -122,6 +122,7 @@ public class TaskService {
         }
 
         Map<String, Procedure> procedureMap = new HashMap<>();
+        Map<String, List<LocalDateTime>> componentTimeLine = new HashMap<>();
 
         // 分配任务
         while (taskQueue.size() > 0) {
@@ -169,12 +170,27 @@ public class TaskService {
                 predictStartTime = LocalDateTime.now();
             }
 
+            List<LocalDateTime> timeLine = componentTimeLine.get(task.getComponentId());
+
+            if (timeLine != null) {
+                LocalDateTime lastEndTime = timeLine.get(timeLine.size() - 1);
+                if (lastEndTime.isAfter(predictStartTime)) {
+                    predictStartTime = lastEndTime;
+                }
+            }
+
             workLoad.setTotalTime(workLoad.getTotalTime() + task.getCompleteTime());
             deviceQueue.add(workLoad);
 
             LocalDateTime predictCompleteTime = this.deviceService.getCompleteTime(predictStartTime,
                     task.getCompleteTime());
             workLoad.setCurrentDateTime(predictCompleteTime);
+
+            if (timeLine == null) {
+                timeLine = new ArrayList<>();
+                componentTimeLine.put(task.getComponentId(), timeLine);
+            }
+            timeLine.add(predictCompleteTime);
 
             Procedure procedure = new Procedure();
             procedure.setDeviceId(workLoad.getDeviceId());
@@ -189,6 +205,14 @@ public class TaskService {
             procedureMap.put(procedure.getId(), procedure);
             plan.getProcedures().add(procedure);
         }
+
+        componentTimeLine.forEach((componentId, timeLine) -> {
+            log.info("=======================");
+            timeLine.forEach(time -> {
+                log.info(componentId + ": " + time.toString());
+            });
+
+        });
 
         return producePlanMap;
     }
