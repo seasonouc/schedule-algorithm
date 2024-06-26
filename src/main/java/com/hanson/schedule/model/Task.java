@@ -51,6 +51,9 @@ public class Task implements Comparable<Task> {
     // 如果是在进行中, 才会有设备id
     private String deviceId;
 
+    // 工序排序
+    private Integer rank;
+
     // 订单要求完成时间
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime targetCompleteTime;
@@ -61,11 +64,11 @@ public class Task implements Comparable<Task> {
 
     @Override
     public int compareTo(Task o) {
-        if (preProcedureId != null && preProcedureId.contains(o.getProcedureId())) {
-            return -1;
-        }
-        if (o.getPreProcedureId() != null && o.getPreProcedureId().contains(procedureId)) {
+        if (preProcedureId != null && preProcedureId.equals(o.procedureId)) {
             return 1;
+        }
+        if (o.getPreProcedureId() != null && o.getPreProcedureId().equals(procedureId)) {
+            return -1;
 
         }
         if (status != o.status) {
@@ -93,6 +96,9 @@ public class Task implements Comparable<Task> {
         }
         if (leftProcedure != o.leftProcedure) {
             return leftProcedure - o.leftProcedure;
+        }
+        if (componentId == o.getComponentId()) {
+            return rank - o.rank;
         }
         return targetCompleteTime.compareTo(o.targetCompleteTime);
     }

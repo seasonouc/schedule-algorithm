@@ -49,9 +49,7 @@ public class TaskService {
         for (Order order : orders) {
             for (Component component : order.getComponents()) {
                 String preProcedureId = null;
-                if (preProcedureId == null && component.getPreId() != null
-                        && componentMap.get(component.getPreId()) != null
-                        && componentMap.get(component.getPreId()).getStatus() != 2) {
+                if (component.getPreId() != null && componentMap.get(component.getPreId()) != null) {
                     Procedure[] lastProcedures = componentMap.get(component.getPreId()).getProcedures();
                     preProcedureId = lastProcedures[lastProcedures.length - 1].getId();
                 }
@@ -62,7 +60,7 @@ public class TaskService {
                     if (preProcedureId != null) {
                         task.setPreProcedureId(preProcedureId);
                     }
-
+                    task.setRank(procedure.getRank());
                     task.setClientPriority(order.getClientPriority());
                     task.setComponentId(component.getId());
                     task.setTargetCompleteTime(order.getTargetCompleteTime());
