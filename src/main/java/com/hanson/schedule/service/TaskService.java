@@ -2,6 +2,8 @@ package com.hanson.schedule.service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +35,7 @@ public class TaskService {
 
         Map<String, PriorityQueue<DeviceWorkLoad>> deviceMap = new HashMap<>();
 
-        PriorityQueue<Task> taskQueue = new PriorityQueue<>();
+        List<Task> taskQueue = new ArrayList<>();
 
         Map<String, Component> componentMap = new HashMap<>();
         for (Order order : orders) {
@@ -93,9 +95,9 @@ public class TaskService {
                     }
 
                     taskQueue.add(task);
-                    if (procedure.getStatus() != 2) {
-                        preProcedureId = procedure.getId();
-                    }
+                    // if (procedure.getStatus() != 2) {
+                    // preProcedureId = procedure.getId();
+                    // }
                 }
             }
         }
@@ -122,9 +124,21 @@ public class TaskService {
         Map<String, Procedure> procedureMap = new HashMap<>();
         Map<String, List<LocalDateTime>> componentTimeLine = new HashMap<>();
 
-        // 分配任务
-        while (taskQueue.size() > 0) {
-            Task task = taskQueue.poll();
+        // Task[] tasks = taskQueue.toArray(new Task[0]);
+        // // 分配任务
+        // while (taskQueue.size() > 0) {
+        // Task task = taskQueue.
+        taskQueue.sort(new Comparator<Task>() {
+
+            @Override
+            public int compare(Task o1, Task o2) {
+                return o1.compareTo(o2);
+            }
+
+        });
+        for (Task task : taskQueue) {
+            log.info(task.getComponentId() + ": " + task.getProcedureId() + ": " +
+                    task.getRank());
             if (task.getStatus() == 2) {
                 continue;
             }

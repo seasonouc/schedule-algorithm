@@ -1,6 +1,7 @@
 package com.hanson.schedule.model;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -62,20 +63,22 @@ public class Task implements Comparable<Task> {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime taskStartTime;
 
-    @Override
     public int compareTo(Task o) {
-        if (preProcedureId != null && preProcedureId.equals(o.procedureId)) {
+        if (preProcedureId != null && preProcedureId.equals(o.getProcedureId())) {
             return 1;
         }
-        if (o.getPreProcedureId() != null && o.getPreProcedureId().equals(procedureId)) {
+        if (o.getPreProcedureId() != null &&
+                o.getPreProcedureId().equals(procedureId)) {
             return -1;
-
         }
-        if (status != o.status) {
-            return o.status - status;
+        if (componentId == o.getComponentId()) {
+            return rank - o.getRank();
         }
-        if (isOriginalReady != o.isOriginalReady) {
-            return o.isOriginalReady ? 1 : -1;
+        if (status != o.getStatus()) {
+            return o.getStatus() - status;
+        }
+        if (isOriginalReady != o.isOriginalReady()) {
+            return o.isOriginalReady() ? 1 : -1;
 
         }
         if (leftProcedure <= 4) {
@@ -84,23 +87,20 @@ public class Task implements Comparable<Task> {
         if (o.getLeftProcedure() <= 4) {
             return 1;
         }
-        if (isPreReady != o.isPreReady) {
-            return o.isPreReady ? 1 : -1;
+        if (isPreReady != o.isPreReady()) {
+            return o.isPreReady() ? 1 : -1;
         }
 
-        if (orderPriority != o.orderPriority) {
-            return o.orderPriority - orderPriority;
+        if (orderPriority != o.getOrderPriority()) {
+            return o.getOrderPriority() - orderPriority;
         }
-        if (clientPriority != o.clientPriority) {
-            return o.clientPriority - clientPriority;
+        if (clientPriority != o.getClientPriority()) {
+            return o.getClientPriority() - clientPriority;
         }
-        if (leftProcedure != o.leftProcedure) {
-            return leftProcedure - o.leftProcedure;
+        if (leftProcedure != o.getLeftProcedure()) {
+            return leftProcedure - o.getLeftProcedure();
         }
-        if (componentId == o.getComponentId()) {
-            return rank - o.rank;
-        }
-        return targetCompleteTime.compareTo(o.targetCompleteTime);
+
+        return targetCompleteTime.compareTo(o.getTargetCompleteTime());
     }
-
 }
