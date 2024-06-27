@@ -122,7 +122,7 @@ public class TaskService {
         }
 
         Map<String, Procedure> procedureMap = new HashMap<>();
-        Map<String, List<LocalDateTime>> componentTimeLine = new HashMap<>();
+        Map<String, List<Procedure>> componentTimeLine = new HashMap<>();
 
         // Task[] tasks = taskQueue.toArray(new Task[0]);
         // // 分配任务
@@ -182,12 +182,12 @@ public class TaskService {
                 predictStartTime = LocalDateTime.now();
             }
 
-            List<LocalDateTime> timeLine = componentTimeLine.get(task.getComponentId());
+            List<Procedure> timeLine = componentTimeLine.get(task.getComponentId());
 
             if (timeLine != null) {
-                LocalDateTime lastEndTime = timeLine.get(timeLine.size() - 1);
-                if (lastEndTime.isAfter(predictStartTime)) {
-                    predictStartTime = lastEndTime;
+                Procedure lastProcedure = timeLine.get(timeLine.size() - 1);
+                if (lastProcedure.getPredictCompleteTime().isAfter(predictStartTime)) {
+                    predictStartTime = lastProcedure.getPredictCompleteTime();
                 }
             }
 
@@ -202,7 +202,6 @@ public class TaskService {
                 timeLine = new ArrayList<>();
                 componentTimeLine.put(task.getComponentId(), timeLine);
             }
-            timeLine.add(predictCompleteTime);
 
             Procedure procedure = new Procedure();
             procedure.setDeviceId(workLoad.getDeviceId());
@@ -216,12 +215,15 @@ public class TaskService {
 
             procedureMap.put(procedure.getId(), procedure);
             plan.getProcedures().add(procedure);
+            timeLine.add(procedure);
         }
 
-        componentTimeLine.forEach((componentId, timeLine) -> {
+        componentTimeLine.forEach((componentId, procedureList) -> {
             log.info("=======================");
-            timeLine.forEach(time -> {
-                log.info(componentId + ": " + time.toString());
+            procedureList.forEach(procedure -> {
+                log.info(componentId + ": " + procedure.getId() + ":" + procedure.getRank() + ":"
+                        + procedure.getPredictStartTime() + ":"
+                        + procedure.getPredictCompleteTime());
             });
 
         });
