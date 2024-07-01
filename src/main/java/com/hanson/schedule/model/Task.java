@@ -82,14 +82,8 @@ public class Task implements Comparable<Task> {
 
         }
 
-        if (leftProcedure != o.getLeftProcedure()) {
-            if (leftProcedure <= 4 && o.getLeftProcedure() <= 4) {
-                return leftProcedure - o.getLeftProcedure();
-            } else if (leftProcedure <= 4) {
-                return -1;
-            } else if (o.getLeftProcedure() <= 4) {
-                return 1;
-            }
+        if (!(leftProcedure > 4 && o.getLeftProcedure() > 4) && leftProcedure != o.getLeftProcedure()) {
+            return leftProcedure - o.getLeftProcedure();
         }
         if (isPreReady != o.isPreReady()) {
             return o.isPreReady() ? 1 : -1;
@@ -100,9 +94,6 @@ public class Task implements Comparable<Task> {
         }
         if (clientPriority != o.getClientPriority()) {
             return o.getClientPriority() - clientPriority;
-        }
-        if (leftProcedure != o.getLeftProcedure()) {
-            return leftProcedure - o.getLeftProcedure();
         }
 
         return targetCompleteTime.compareTo(o.getTargetCompleteTime());
