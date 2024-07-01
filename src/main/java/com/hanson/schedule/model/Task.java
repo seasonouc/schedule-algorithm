@@ -81,11 +81,15 @@ public class Task implements Comparable<Task> {
             return o.isOriginalReady() ? 1 : -1;
 
         }
-        if (leftProcedure <= 4) {
-            return -1;
-        }
-        if (o.getLeftProcedure() <= 4) {
-            return 1;
+
+        if (leftProcedure != o.getLeftProcedure()) {
+            if (leftProcedure <= 4 && o.getLeftProcedure() <= 4) {
+                return leftProcedure - o.getLeftProcedure();
+            } else if (leftProcedure <= 4) {
+                return -1;
+            } else if (o.getLeftProcedure() <= 4) {
+                return 1;
+            }
         }
         if (isPreReady != o.isPreReady()) {
             return o.isPreReady() ? 1 : -1;
