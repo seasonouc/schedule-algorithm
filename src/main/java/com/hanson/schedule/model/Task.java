@@ -1,7 +1,6 @@
 package com.hanson.schedule.model;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -64,6 +63,9 @@ public class Task implements Comparable<Task> {
     private LocalDateTime taskStartTime;
 
     public int compareTo(Task o) {
+        if (status != o.getStatus()) {
+            return o.getStatus() - status;
+        }
         if (preProcedureId != null && preProcedureId.equals(o.getProcedureId())) {
             return 1;
         }
@@ -74,9 +76,7 @@ public class Task implements Comparable<Task> {
         if (componentId == o.getComponentId()) {
             return rank - o.getRank();
         }
-        if (status != o.getStatus()) {
-            return o.getStatus() - status;
-        }
+
         if (isOriginalReady != o.isOriginalReady()) {
             return o.isOriginalReady() ? 1 : -1;
 

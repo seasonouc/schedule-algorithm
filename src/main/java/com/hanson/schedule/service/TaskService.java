@@ -45,7 +45,7 @@ public class TaskService {
         }
 
         // key = deviceId
-        Map<String, DeviceWorkLoad> presetWorkload = new HashMap<>();
+        // Map<String, DeviceWorkLoad> presetWorkload = new HashMap<>();
         Map<String, ProducePlan> producePlanMap = new HashMap<>();
 
         for (Order order : orders) {
@@ -76,13 +76,14 @@ public class TaskService {
                     task.setOriginalReady(component.isOriginalReady());
                     task.setStatus(procedure.getStatus());
                     task.setPreReady(procedure.isPreReady());
+                    task.setTaskStartTime(procedure.getStartTime());
                     if (procedure.getDeviceId() != null && !"".equals(procedure.getDeviceId())) {
                         task.setDeviceId(procedure.getDeviceId());
                         DeviceWorkLoad workLoad = new DeviceWorkLoad();
                         workLoad.setDeviceId(procedure.getDeviceId());
                         workLoad.setTaskCount(1);
                         workLoad.setTotalTime(task.getCompleteTime());
-                        presetWorkload.put(procedure.getDeviceId(), workLoad);
+                        // presetWorkload.put(procedure.getDeviceId(), workLoad);
 
                         ProducePlan plan = new ProducePlan();
                         plan.setStartTime(procedure.getStartTime());
@@ -91,7 +92,7 @@ public class TaskService {
                         procedures.add(procedure);
                         plan.setProcedures(procedures);
 
-                        producePlanMap.put(procedure.getDeviceId(), plan);
+                        // producePlanMap.put(procedure.getDeviceId(), plan);
                     }
 
                     taskQueue.add(task);
@@ -110,14 +111,14 @@ public class TaskService {
                 deviceMap.put(code, deviceQueue);
             }
 
-            DeviceWorkLoad workLoad = presetWorkload.get(device.getId());
+            // DeviceWorkLoad workLoad = presetWorkload.get(device.getId());
 
-            if (workLoad == null) {
-                workLoad = new DeviceWorkLoad();
-                workLoad.setDeviceId(device.getId());
-                workLoad.setTaskCount(0);
-                workLoad.setTotalTime(0);
-            }
+            // if (workLoad == null) {
+            DeviceWorkLoad workLoad = new DeviceWorkLoad();
+            workLoad.setDeviceId(device.getId());
+            workLoad.setTaskCount(0);
+            workLoad.setTotalTime(0);
+            // }
             deviceQueue.add(workLoad);
         }
 
@@ -148,7 +149,26 @@ public class TaskService {
                 log.error("deviceQueue is null, deviceCode: {}", deviceCode);
                 continue;
             }
-            DeviceWorkLoad workLoad = deviceQueue.poll();
+
+            DeviceWorkLoad workLoad = null;
+
+            if (task.getStatus() == 1) {
+                for (DeviceWorkLoad deviceWorkLoad : deviceQueue) {
+                    if (deviceWorkLoad.getDeviceId().equals(task.getDeviceId())) {
+                        workLoad = deviceWorkLoad;
+                        break;
+                    }
+                }
+                deviceQueue.remove(workLoad);
+            } else {
+                workLoad = deviceQueue.poll();
+            }
+
+            if (workLoad == null) {
+                log.error("workLoad is null, task: {}", task);
+                continue;
+            }
+
             workLoad.setTaskCount(workLoad.getTaskCount() + 1);
 
             ProducePlan plan = producePlanMap.get(workLoad.getDeviceId());
@@ -196,6 +216,11 @@ public class TaskService {
 
             LocalDateTime predictCompleteTime = this.deviceService.getCompleteTime(predictStartTime,
                     task.getCompleteTime());
+
+            if (task.getStatus() == 1 && predictCompleteTime.isBefore(LocalDateTime.now())) {
+                // 如果任务已经在进行中，才会有开始时间
+                predictCompleteTime = LocalDateTime.now();
+            }
             workLoad.setCurrentDateTime(predictCompleteTime);
 
             if (timeLine == null) {
