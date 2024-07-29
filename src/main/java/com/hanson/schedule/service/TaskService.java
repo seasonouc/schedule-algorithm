@@ -2,13 +2,13 @@ package com.hanson.schedule.service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -152,7 +152,7 @@ public class TaskService {
 
             DeviceWorkLoad workLoad = null;
 
-            if (task.getStatus() == 1) {
+            if (task.getStatus() == 1 && Strings.isNotBlank(task.getDeviceId())) {
                 for (DeviceWorkLoad deviceWorkLoad : deviceQueue) {
                     if (deviceWorkLoad.getDeviceId().equals(task.getDeviceId())) {
                         workLoad = deviceWorkLoad;
@@ -196,9 +196,10 @@ public class TaskService {
             }
 
             Procedure preProcedure = procedureMap.get(task.getPreProcedureId());
-            if (preProcedure != null && preProcedure.getPredictCompleteTime().isBefore(predictStartTime)) {
+            if (preProcedure != null && !task.isPreReady()
+                    && preProcedure.getPredictCompleteTime().isBefore(predictStartTime)) {
                 predictStartTime = preProcedure.getPredictCompleteTime();
-            } else if (deviceCode.equalsIgnoreCase("outsource")) {
+            } else if (predictStartTime == null && deviceCode.equalsIgnoreCase("outsource")) {
                 predictStartTime = LocalDateTime.now();
             }
 
@@ -212,6 +213,7 @@ public class TaskService {
             }
 
             workLoad.setTotalTime(workLoad.getTotalTime() + task.getCompleteTime());
+            workLoad.setTaskCount(workLoad.getTaskCount() + 1);
             deviceQueue.add(workLoad);
 
             LocalDateTime predictCompleteTime = this.deviceService.getCompleteTime(predictStartTime,
