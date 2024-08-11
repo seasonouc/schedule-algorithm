@@ -62,10 +62,23 @@ public class Task implements Comparable<Task> {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime taskStartTime;
 
+    public int getPreStatus() {
+        return isPreReady ? 0 : 1;
+    }
+
+    public int getOriginStatus() {
+        return isOriginalReady ? 0 : 1;
+    }
+
     public int compareTo(Task o) {
         if (status != o.getStatus()) {
             return o.getStatus() - status;
         }
+
+        if (getOriginStatus() != o.getOriginStatus()) {
+            return getOriginStatus() - o.getOriginStatus();
+        }
+
         if (preProcedureId != null && preProcedureId.equals(o.getProcedureId())) {
             return 1;
         }
@@ -77,13 +90,8 @@ public class Task implements Comparable<Task> {
             return rank - o.getRank();
         }
 
-        if (isOriginalReady != o.isOriginalReady()) {
-            return o.isOriginalReady() ? 1 : -1;
-
-        }
-
-        if (isPreReady != o.isPreReady()) {
-            return o.isPreReady() ? 1 : -1;
+        if (getPreStatus() != o.getPreStatus()) {
+            return getPreStatus() - o.getPreStatus();
         }
 
         if (leftProcedure != o.getLeftProcedure()) {

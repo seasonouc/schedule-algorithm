@@ -19,6 +19,8 @@ import com.hanson.schedule.model.Order;
 import com.hanson.schedule.model.Procedure;
 import com.hanson.schedule.model.ProducePlan;
 import com.hanson.schedule.model.Task;
+import com.hanson.schedule.model.TimeRange;
+import com.hanson.utils.TimeUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -115,6 +117,7 @@ public class TaskService {
 
             // if (workLoad == null) {
             DeviceWorkLoad workLoad = new DeviceWorkLoad();
+            workLoad.initTimeRage();
             workLoad.setDeviceId(device.getId());
             workLoad.setTaskCount(0);
             workLoad.setTotalTime(0);
@@ -169,7 +172,7 @@ public class TaskService {
                 continue;
             }
 
-            workLoad.setTaskCount(workLoad.getTaskCount() + 1);
+            // workLoad.setTaskCount(workLoad.getTaskCount() + 1);
 
             ProducePlan plan = producePlanMap.get(workLoad.getDeviceId());
 
@@ -184,15 +187,13 @@ public class TaskService {
                     // 设置开始时间为当前时间(即任务开始时间)
                     plan.setStartTime(LocalDateTime.now());
                 }
-
-                workLoad.setCurrentDateTime(plan.getStartTime());
                 List<Procedure> procedures = new ArrayList<>();
                 plan.setProcedures(procedures);
                 producePlanMap.put(workLoad.getDeviceId(), plan);
             }
             LocalDateTime predictStartTime = task.getTaskStartTime();
-            if (predictStartTime == null) {
-                predictStartTime = workLoad.getCurrentDateTime();
+            if (predictStartTime == null && !deviceCode.equalsIgnoreCase("outsource")) {
+                predictStartTime = workLoad.getAvailableTimeRange(task.getCompleteTime()).getFrom();
             }
 
             Procedure preProcedure = procedureMap.get(task.getPreProcedureId());
@@ -212,18 +213,26 @@ public class TaskService {
                 }
             }
 
-            workLoad.setTotalTime(workLoad.getTotalTime() + task.getCompleteTime());
-            workLoad.setTaskCount(workLoad.getTaskCount() + 1);
-            deviceQueue.add(workLoad);
-
-            LocalDateTime predictCompleteTime = this.deviceService.getCompleteTime(predictStartTime,
+            LocalDateTime predictCompleteTime = TimeUtil.getCompleteTime(predictStartTime,
                     task.getCompleteTime());
+
+            if (!task.getDeviceCode().equalsIgnoreCase("outsource")) {
+
+                TimeRange reloadTime = workLoad.getAvailableTimeRange(predictStartTime, predictCompleteTime,
+                        task.getCompleteTime());
+
+                predictStartTime = reloadTime.getFrom();
+                predictCompleteTime = reloadTime.getTo();
+            }
 
             if (task.getStatus() == 1 && predictCompleteTime.isBefore(LocalDateTime.now())) {
                 // 如果任务已经在进行中，才会有开始时间
                 predictCompleteTime = LocalDateTime.now();
             }
-            workLoad.setCurrentDateTime(predictCompleteTime);
+            workLoad.setTotalTime(workLoad.getTotalTime() + task.getCompleteTime());
+            workLoad.setTaskCount(workLoad.getTaskCount() + 1);
+            deviceQueue.add(workLoad);
+            workLoad.freeAndSave(predictStartTime, predictCompleteTime);
 
             if (timeLine == null) {
                 timeLine = new ArrayList<>();

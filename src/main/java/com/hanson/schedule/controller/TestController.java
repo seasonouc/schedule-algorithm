@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hanson.schedule.service.DeviceService;
+import com.hanson.utils.TimeUtil;
 
 import io.swagger.annotations.ApiParam;
 
@@ -29,7 +30,7 @@ public class TestController {
             fromDateTime = LocalDateTime.parse(fromTime);
         }
 
-        return this.deviceService.getCompleteTime(fromDateTime, completeSec).toString();
+        return TimeUtil.getCompleteTime(fromDateTime, completeSec).toString();
     }
 
 }
