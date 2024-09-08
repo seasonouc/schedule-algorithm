@@ -86,16 +86,9 @@ public class Task implements Comparable<Task> {
                 o.getPreProcedureId().equals(procedureId)) {
             return -1;
         }
-        if (componentId == o.getComponentId()) {
-            return rank - o.getRank();
-        }
 
         if (getPreStatus() != o.getPreStatus()) {
             return getPreStatus() - o.getPreStatus();
-        }
-
-        if (leftProcedure != o.getLeftProcedure()) {
-            return leftProcedure - o.getLeftProcedure();
         }
 
         if (orderPriority != o.getOrderPriority()) {
@@ -103,6 +96,12 @@ public class Task implements Comparable<Task> {
         }
         if (clientPriority != o.getClientPriority()) {
             return o.getClientPriority() - clientPriority;
+        }
+        if (rank != o.getRank()) {
+            return rank - o.getRank();
+        }
+        if (leftProcedure != o.getLeftProcedure()) {
+            return leftProcedure - o.getLeftProcedure();
         }
 
         return targetCompleteTime.compareTo(o.getTargetCompleteTime());

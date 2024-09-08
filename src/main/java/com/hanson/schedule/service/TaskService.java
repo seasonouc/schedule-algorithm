@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -128,18 +129,22 @@ public class TaskService {
         Map<String, Procedure> procedureMap = new HashMap<>();
         Map<String, List<Procedure>> componentTimeLine = new HashMap<>();
 
-        // Task[] tasks = taskQueue.toArray(new Task[0]);
-        // // 分配任务
-        // while (taskQueue.size() > 0) {
-        // Task task = taskQueue.
-        taskQueue.sort(new Comparator<Task>() {
+        Comparator<Task> comparator = new Comparator<Task>() {
 
             @Override
             public int compare(Task o1, Task o2) {
                 return o1.compareTo(o2);
             }
+        };
 
-        });
+        List<Task> part1 = taskQueue.stream().filter(t -> t.getLeftProcedure() <= 4).collect(Collectors.toList());
+        part1.sort(comparator);
+        List<Task> part2 = taskQueue.stream().filter(t -> t.getLeftProcedure() > 4).collect(Collectors.toList());
+        part2.sort(comparator);
+        part1.addAll(part2);
+
+        taskQueue = part1;
+
         for (Task task : taskQueue) {
             log.info(task.getComponentId() + ": " + task.getProcedureId() + ": " +
                     task.getRank());
