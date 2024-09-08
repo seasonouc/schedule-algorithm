@@ -137,15 +137,31 @@ public class TaskService {
             }
         };
 
-        List<Task> part1 = taskQueue.stream().filter(t -> t.getLeftProcedure() <= 4).collect(Collectors.toList());
-        part1.sort(comparator);
-        List<Task> part2 = taskQueue.stream().filter(t -> t.getLeftProcedure() > 4).collect(Collectors.toList());
-        part2.sort(comparator);
-        part1.addAll(part2);
+        List<Task> newTaskQueue = new ArrayList<>();
 
-        taskQueue = part1;
+        List<Task> part1 = new ArrayList<>(taskQueue).stream().filter(t -> t.isPreReady())
+                .collect(Collectors.toList());
+        List<Task> part11 = part1.stream().filter(t -> t.getLeftProcedure() <= 4).collect(Collectors.toList());
+        List<Task> part12 = part1.stream().filter(t -> t.getLeftProcedure() > 4).collect(Collectors.toList());
 
-        for (Task task : taskQueue) {
+        part11.sort(comparator);
+        part12.sort(comparator);
+
+        newTaskQueue.addAll(new ArrayList<>(part11));
+        newTaskQueue.addAll(new ArrayList<>(part12));
+
+        List<Task> part2 = new ArrayList<>(taskQueue).stream().filter(t -> !t.isPreReady())
+                .collect(Collectors.toList());
+        List<Task> part21 = part2.stream().filter(t -> t.getLeftProcedure() <= 4).collect(Collectors.toList());
+        List<Task> part22 = part2.stream().filter(t -> t.getLeftProcedure() > 4).collect(Collectors.toList());
+
+        part21.sort(comparator);
+        part22.sort(comparator);
+
+        newTaskQueue.addAll(new ArrayList<>(part11));
+        newTaskQueue.addAll(new ArrayList<>(part12));
+
+        for (Task task : newTaskQueue) {
             log.info(task.getComponentId() + ": " + task.getProcedureId() + ": " +
                     task.getRank());
             if (task.getStatus() == 2) {

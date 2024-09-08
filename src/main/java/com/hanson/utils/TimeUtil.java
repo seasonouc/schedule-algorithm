@@ -14,6 +14,18 @@ public class TimeUtil {
     private static WorkTimeLine[] workTimeLines = { new WorkTimeLine(LocalTime.of(8, 0, 0), LocalTime.of(12, 0, 0)),
             new WorkTimeLine(LocalTime.of(14, 0, 0), LocalTime.of(20, 0, 0)) };
 
+    public static LocalDateTime getStartDateTime() {
+        LocalDateTime now = LocalDateTime.now();
+        if (now.getDayOfWeek() == DayOfWeek.SATURDAY) {
+            LocalDate temp = now.toLocalDate().plusDays(2L);
+            now = LocalDateTime.of(temp.getYear(), temp.getMonth(), temp.getDayOfMonth(), 8, 0, 0);
+        } else if (now.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            LocalDate temp = now.toLocalDate().plusDays(1);
+            now = LocalDateTime.of(temp.getYear(), temp.getMonth(), temp.getDayOfMonth(), 8, 0, 0);
+        }
+        return now;
+    }
+
     public static LocalDateTime getCompleteTime(LocalDateTime fromTime, long sec) {
         LocalTime fromLocalTime = fromTime.toLocalTime();
         LocalDate targetDate = LocalDate.of(fromTime.getYear(), fromTime.getMonthValue(), fromTime.getDayOfMonth());

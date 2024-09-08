@@ -75,18 +75,6 @@ public class Task implements Comparable<Task> {
             return o.getStatus() - status;
         }
 
-        if (getOriginStatus() != o.getOriginStatus()) {
-            return getOriginStatus() - o.getOriginStatus();
-        }
-
-        if (preProcedureId != null && preProcedureId.equals(o.getProcedureId())) {
-            return 1;
-        }
-        if (o.getPreProcedureId() != null &&
-                o.getPreProcedureId().equals(procedureId)) {
-            return -1;
-        }
-
         if (getPreStatus() != o.getPreStatus()) {
             return getPreStatus() - o.getPreStatus();
         }
@@ -94,6 +82,11 @@ public class Task implements Comparable<Task> {
         if (orderPriority != o.getOrderPriority()) {
             return o.getOrderPriority() - orderPriority;
         }
+
+        if (componentPriority != o.getComponentPriority()) {
+            return o.getComponentPriority() - componentPriority;
+        }
+
         if (clientPriority != o.getClientPriority()) {
             return o.getClientPriority() - clientPriority;
         }
