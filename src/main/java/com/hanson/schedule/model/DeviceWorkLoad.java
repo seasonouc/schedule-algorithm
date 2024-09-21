@@ -86,8 +86,10 @@ public class DeviceWorkLoad implements Comparable<DeviceWorkLoad> {
         }
         int size = timeRanges.size();
         TimeRange last = timeRanges.get(size - 1);
-        start = last.getTo();
-        end = TimeUtil.getCompleteTime(start, sec);
+        if (last.getTo().isAfter(start)) {
+            start = last.getTo();
+            end = TimeUtil.getCompleteTime(start, sec);
+        }
 
         return new TimeRange(start, end);
     }

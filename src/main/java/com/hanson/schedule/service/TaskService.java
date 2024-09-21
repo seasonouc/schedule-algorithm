@@ -61,10 +61,8 @@ public class TaskService {
                 for (Procedure procedure : component.getProcedures()) {
 
                     Task task = new Task();
-                    // TODO 组装 task
-                    if (preProcedureId != null) {
-                        task.setPreProcedureId(preProcedureId);
-                    }
+                    task.setPreProcedureId(preProcedureId);
+
                     task.setRank(procedure.getRank());
                     task.setClientPriority(order.getClientPriority());
                     task.setComponentId(component.getId());
@@ -100,7 +98,7 @@ public class TaskService {
 
                     taskQueue.add(task);
                     // if (procedure.getStatus() != 2) {
-                    // preProcedureId = procedure.getId();
+                    preProcedureId = procedure.getId();
                     // }
                 }
             }
@@ -158,8 +156,8 @@ public class TaskService {
         part21.sort(comparator);
         part22.sort(comparator);
 
-        newTaskQueue.addAll(new ArrayList<>(part11));
-        newTaskQueue.addAll(new ArrayList<>(part12));
+        newTaskQueue.addAll(new ArrayList<>(part21));
+        newTaskQueue.addAll(new ArrayList<>(part22));
 
         for (Task task : newTaskQueue) {
             log.info(task.getComponentId() + ": " + task.getProcedureId() + ": " +
@@ -219,10 +217,17 @@ public class TaskService {
 
             Procedure preProcedure = procedureMap.get(task.getPreProcedureId());
             if (preProcedure != null && !task.isPreReady()
-                    && preProcedure.getPredictCompleteTime().isBefore(predictStartTime)) {
+                    && (predictStartTime == null ||
+                            preProcedure.getPredictCompleteTime().isBefore(predictStartTime))) {
                 predictStartTime = preProcedure.getPredictCompleteTime();
-            } else if (predictStartTime == null && deviceCode.equalsIgnoreCase("outsource")) {
+            } else if (predictStartTime == null &&
+                    deviceCode.equalsIgnoreCase("outsource")) {
                 predictStartTime = LocalDateTime.now();
+            }
+            if (preProcedure != null) {
+                if (predictStartTime == null || predictStartTime.isBefore(preProcedure.getPredictCompleteTime())) {
+                    predictStartTime = preProcedure.getPredictCompleteTime();
+                }
             }
 
             List<Procedure> timeLine = componentTimeLine.get(task.getComponentId());
@@ -284,6 +289,12 @@ public class TaskService {
             });
 
         });
+        int size = 0;
+
+        for (ProducePlan plan : producePlanMap.values()) {
+            size += plan.getProcedures().size();
+        }
+        log.info("total input: " + newTaskQueue.size() + " output: " + size);
 
         return producePlanMap;
     }
